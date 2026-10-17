@@ -1069,7 +1069,9 @@ body {
   max-width: 440px;
   padding: 0 20px calc(95px + var(--safe-bottom)) 20px;
   display: flex;
-  height: 50%;
+  justify-content: center;
+  align-items: center;
+  height: 130px;
   gap: 10px;
 }
 
