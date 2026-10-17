@@ -77,14 +77,30 @@
           </div>
         </div>
 
-        <!-- 🌟 FOCUSED BIG WINDOW: "MONEY LEFT" (Matching Reference Photo 1) 🌟 -->
+        <!-- 🌟 FOCUSED BIG WINDOW: "MONEY LEFT" / "TOTAL BALANCE" 🌟 -->
         <div class="focused-hero-card">
-          <div class="hero-card-tag">MONEY LEFT</div>
+          <div class="hero-card-tag-row">
+            <span class="hero-card-tag" id="hero-card-tag">MONEY LEFT</span>
+          </div>
           
-          <div class="hero-amount-wrap hero-amount-clickable" onclick="openIncomeEntriesModal()" title="Tap to view & edit income/salary entries">
-            <h1 id="hero-balance-val" class="hero-balance-amount">₹0</h1>
-            <span id="hero-month-sub" class="hero-balance-sub">October 2026</span>
-            <span class="click-hint-badge">View Incomes →</span>
+          <div class="hero-amount-wrap">
+            <div class="hero-amount-group hero-amount-clickable" onclick="openIncomeEntriesModal()" title="Tap to view & edit income/salary entries">
+              <h1 id="hero-balance-val" class="hero-balance-amount">₹0</h1>
+              <span id="hero-month-sub" class="hero-balance-sub">October 2026</span>
+            </div>
+
+            <div class="hero-badges-wrap">
+              <button type="button" id="toggle-balance-mode-btn" class="balance-toggle-pill" onclick="toggleBalanceMode(event)" title="Click to see total money in hand across all months">
+                <span class="toggle-mode-icon">⇄</span>
+                <span id="balance-mode-label">Total Balance</span>
+              </button>
+              <button type="button" class="click-hint-badge" onclick="openIncomeEntriesModal()" title="Tap to view & edit income/salary entries">View Incomes →</button>
+            </div>
+          </div>
+
+          <!-- Carryover from previous months indicator -->
+          <div id="hero-carryover-note" class="hero-carryover-note hidden">
+            <span id="hero-carryover-text">Includes ₹0 saved from previous months</span>
           </div>
 
           <!-- Progress Bar & Spend Metric -->
@@ -207,6 +223,9 @@
 
           <div class="hero-amount-wrap">
             <h1 id="summary-balance-val" class="hero-balance-amount">₹0 <span class="amount-sub-badge">LEFT</span></h1>
+          </div>
+          <div id="summary-carryover-stat" class="summary-carryover-stat hidden">
+            <span>Total in Hand: <strong id="summary-total-in-hand-val">₹0</strong> (includes <span id="summary-prev-carryover-val">₹0</span> from prior months)</span>
           </div>
 
           <!-- Dual Stat Boxes: Came In & Went Out -->

@@ -229,6 +229,55 @@ app.get('/api/summary', async (req, res) => {
     const spentPercentage = totalIncome > 0 ? Math.min(Math.round((totalExpense / totalIncome) * 100), 100) : 0;
     const remainingPercentage = totalIncome > 0 ? Math.max(Math.round((balance / totalIncome) * 100), 0) : 0;
 
+    // Calculate Previous Months' Balance (Carryover) & Cumulative Total
+    let previousIncome = 0;
+    let previousExpense = 0;
+    let previousBalance = 0;
+
+    if (targetMonth !== 'all') {
+      const prevAgg = await Transaction.aggregate([
+        { $match: { monthYear: { $lt: targetMonth } } },
+        {
+          $group: {
+            _id: null,
+            totalIncome: {
+              $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] }
+            },
+            totalExpense: {
+              $sum: { $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0] }
+            }
+          }
+        }
+      ]);
+
+      if (prevAgg.length > 0) {
+        previousIncome = prevAgg[0].totalIncome || 0;
+        previousExpense = prevAgg[0].totalExpense || 0;
+        previousBalance = previousIncome - previousExpense;
+      }
+    }
+
+    // Cumulative balance up to & including targetMonth
+    const cumulativeBalance = previousBalance + balance;
+
+    // All-time balance across the entire database
+    const allTimeAgg = await Transaction.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalIncome: {
+            $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] }
+          },
+          totalExpense: {
+            $sum: { $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0] }
+          }
+        }
+      }
+    ]);
+    const allTimeIncome = allTimeAgg.length > 0 ? (allTimeAgg[0].totalIncome || 0) : 0;
+    const allTimeExpense = allTimeAgg.length > 0 ? (allTimeAgg[0].totalExpense || 0) : 0;
+    const allTimeBalance = allTimeIncome - allTimeExpense;
+
     // Calculate days remaining in the target month (if it's the current month)
     const now = new Date();
     const [yStr, mStr] = targetMonth.split('-');
@@ -262,6 +311,13 @@ app.get('/api/summary', async (req, res) => {
         totalIncome,
         totalExpense,
         balance,
+        previousIncome,
+        previousExpense,
+        previousBalance,
+        cumulativeBalance,
+        allTimeIncome,
+        allTimeExpense,
+        allTimeBalance,
         spentPercentage,
         remainingPercentage,
         daysInMonth,

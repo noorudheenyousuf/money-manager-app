@@ -37,7 +37,8 @@ const state = {
   searchQuery: '',
   modalType: 'expense',
   editingTxId: null,
-  pendingDeleteId: null
+  pendingDeleteId: null,
+  balanceMode: localStorage.getItem('cashflow_balance_mode') || 'month' // 'month' | 'total'
 };
 
 // ========================================================
@@ -158,13 +159,28 @@ async function fetchTransactions() {
 // ========================================================
 
 function renderHeader() {
-  const sum = state.summary || { balance: 0 };
+  const sum = state.summary || { balance: 0, cumulativeBalance: 0, previousBalance: 0 };
   const monthLong = getMonthYearFormatted(state.currentMonth, 'long').toUpperCase();
   const monthShort = getMonthYearFormatted(state.currentMonth, 'short');
+  const isTotal = state.balanceMode === 'total';
+
+  const totalInHand = sum.cumulativeBalance !== undefined 
+    ? sum.cumulativeBalance 
+    : (sum.balance + (sum.previousBalance || 0));
+  const displayVal = isTotal ? totalInHand : sum.balance;
 
   // Header Title & Balance
-  document.getElementById('header-balance-label').textContent = `BALANCE · ${monthLong}`;
-  document.getElementById('header-balance-val').textContent = formatRupees(sum.balance);
+  document.getElementById('header-balance-label').textContent = isTotal 
+    ? 'TOTAL BALANCE · IN HAND' 
+    : `BALANCE · ${monthLong}`;
+  
+  const headerValEl = document.getElementById('header-balance-val');
+  headerValEl.textContent = formatRupees(displayVal);
+  if (displayVal < 0) {
+    headerValEl.classList.add('text-danger');
+  } else {
+    headerValEl.classList.remove('text-danger');
+  }
 
   // Month Navigator Pill `< Oct 26 >`
   document.getElementById('current-month-display').textContent = monthShort;
@@ -191,6 +207,9 @@ function renderBalanceView() {
     totalIncome: 0,
     totalExpense: 0,
     balance: 0,
+    previousBalance: 0,
+    cumulativeBalance: 0,
+    allTimeBalance: 0,
     spentPercentage: 0,
     safeDailyAllowance: 0,
     daysLeft: 0,
@@ -198,10 +217,62 @@ function renderBalanceView() {
   };
 
   const monthLong = getMonthYearFormatted(state.currentMonth, 'long');
+  const isTotal = state.balanceMode === 'total';
 
-  // Focused Big Window ("MONEY LEFT")
-  document.getElementById('hero-balance-val').textContent = formatRupees(sum.balance);
-  document.getElementById('hero-month-sub').textContent = monthLong;
+  const totalInHand = sum.cumulativeBalance !== undefined 
+    ? sum.cumulativeBalance 
+    : (sum.balance + (sum.previousBalance || 0));
+  const displayBalance = isTotal ? totalInHand : sum.balance;
+
+  // Focused Big Window ("MONEY LEFT" or "TOTAL BALANCE")
+  const heroCardTag = document.getElementById('hero-card-tag');
+  if (heroCardTag) {
+    heroCardTag.textContent = isTotal ? 'TOTAL BALANCE (IN HAND)' : 'MONEY LEFT';
+  }
+
+  const heroBalanceEl = document.getElementById('hero-balance-val');
+  heroBalanceEl.textContent = formatRupees(displayBalance);
+  if (displayBalance < 0) {
+    heroBalanceEl.classList.add('text-danger');
+  } else {
+    heroBalanceEl.classList.remove('text-danger');
+  }
+
+  document.getElementById('hero-month-sub').textContent = isTotal 
+    ? 'Total in hand' 
+    : monthLong;
+
+  // Update Toggle Button label & active state
+  const toggleBtn = document.getElementById('toggle-balance-mode-btn');
+  const toggleLabel = document.getElementById('balance-mode-label');
+  if (toggleBtn && toggleLabel) {
+    if (isTotal) {
+      toggleLabel.textContent = 'Month Balance';
+      toggleBtn.classList.add('active-total');
+      toggleBtn.title = 'Switch back to this month\'s balance';
+    } else {
+      toggleLabel.textContent = 'Total Balance';
+      toggleBtn.classList.remove('active-total');
+      toggleBtn.title = 'Switch to total money in hand across all months';
+    }
+  }
+
+  // Carryover Note Footnote
+  const carryoverNote = document.getElementById('hero-carryover-note');
+  const carryoverText = document.getElementById('hero-carryover-text');
+  const prevBal = sum.previousBalance || 0;
+  if (carryoverNote && carryoverText) {
+    if (isTotal) {
+      carryoverNote.classList.remove('hidden');
+      if (prevBal !== 0) {
+        carryoverText.innerHTML = `Includes <strong>${formatRupees(prevBal)}</strong> saved from previous months + <strong>${formatRupees(sum.balance)}</strong> this month`;
+      } else {
+        carryoverText.innerHTML = `All previous months' balance included (${formatRupees(displayBalance)} total in hand)`;
+      }
+    } else {
+      carryoverNote.classList.add('hidden');
+    }
+  }
 
   // Progress Bar
   const spentPct = sum.totalIncome > 0 ? Math.min(sum.spentPercentage, 100) : 0;
@@ -237,6 +308,26 @@ function renderBalanceView() {
   // Where it went preview
   renderWhereItWentPreview(sum);
 }
+
+// Toggle between Month Balance and Total Balance
+function toggleBalanceMode(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  state.balanceMode = state.balanceMode === 'month' ? 'total' : 'month';
+  localStorage.setItem('cashflow_balance_mode', state.balanceMode);
+
+  renderHeader();
+  renderBalanceView();
+
+  const isTotal = state.balanceMode === 'total';
+  if (window.showToast) {
+    window.showToast(isTotal ? 'Switched to Total Balance in Hand' : 'Switched to This Month\'s Balance', 'info');
+  }
+}
+window.toggleBalanceMode = toggleBalanceMode;
 
 function renderRecentActivityList() {
   const container = document.getElementById('recent-activity-list');
@@ -519,6 +610,23 @@ function renderSummaryView() {
   document.getElementById('summary-header-tag').textContent = `MONTH TOTAL · ${monthLong}`;
   document.getElementById('summary-balance-val').innerHTML = 
     `${formatRupees(sum.balance)} <span class="amount-sub-badge">LEFT</span>`;
+
+  // Carryover & Total in hand
+  const summaryCarryoverEl = document.getElementById('summary-carryover-stat');
+  const summaryTotalInHandEl = document.getElementById('summary-total-in-hand-val');
+  const summaryPrevCarryoverEl = document.getElementById('summary-prev-carryover-val');
+  const prevBal = sum.previousBalance || 0;
+  const totalInHand = sum.cumulativeBalance !== undefined ? sum.cumulativeBalance : (sum.balance + prevBal);
+
+  if (summaryCarryoverEl && summaryTotalInHandEl && summaryPrevCarryoverEl) {
+    if (prevBal !== 0) {
+      summaryCarryoverEl.classList.remove('hidden');
+      summaryTotalInHandEl.textContent = formatRupees(totalInHand);
+      summaryPrevCarryoverEl.textContent = formatRupees(prevBal);
+    } else {
+      summaryCarryoverEl.classList.add('hidden');
+    }
+  }
 
   document.getElementById('summary-came-in-val').textContent = formatRupees(sum.totalIncome);
   document.getElementById('summary-went-out-val').textContent = formatRupees(sum.totalExpense);
