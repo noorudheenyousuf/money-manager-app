@@ -1,0 +1,58 @@
+{
+  "name": "DhanDost - Money Manager & Balance Tracker",
+  "short_name": "DhanDost",
+  "description": "Smart Money Manager. Track monthly income and expenses in real-time with continuous Rupees balance awareness.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Income",
+      "short_name": "Income",
+      "description": "Quickly record a new income",
+      "url": "/#add-income",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Add Expense",
+      "short_name": "Expense",
+      "description": "Record a new expense item",
+      "url": "/#add-expense",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Monthly Report",
+      "short_name": "Report",
+      "description": "View monthly income vs expense analytics",
+      "url": "/#report",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

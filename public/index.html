@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>DhanDost - Money Manager & Balance Tracker</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0f0d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DhanDost">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+
+  <!-- Plus Jakarta Sans Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Offline Status Banner -->
+  <div id="offline-banner" class="offline-banner hidden">
+    <span>⚠️ Offline mode active. Transactions are saved locally and will sync when reconnected.</span>
+  </div>
+
+  <!-- Main Mobile App Wrapper -->
+  <div class="app-container">
+
+    <!-- Clean Top Header (Matching Reference Photos) -->
+    <header class="app-header">
+      <div class="header-left">
+        <span class="header-balance-label" id="header-balance-label">BALANCE · OCTOBER 2026</span>
+        <span class="header-balance-val" id="header-balance-val">₹0</span>
+      </div>
+
+      <div class="header-right">
+        <!-- Month Navigator Pill -->
+        <div class="month-pill">
+          <button id="prev-month-btn" class="pill-arrow-btn" title="Previous Month">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="pill-month-text-wrap">
+            <span id="current-month-display" class="pill-month-text">Oct 26</span>
+            <select id="month-picker-select" class="month-picker-select" title="Jump to month"></select>
+          </div>
+          <button id="next-month-btn" class="pill-arrow-btn" title="Next Month">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- User Profile Avatar -->
+        <div class="user-avatar" title="DhanDost User">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN APP VIEWS CONTAINER -->
+    <main class="app-main">
+
+      <!-- ================= TAB 1: BALANCE ================= -->
+      <section id="view-balance" class="app-view active">
+        
+        <!-- Welcome Prompt Banner (Shown when no income is set for this month) -->
+        <div id="first-income-banner" class="alert-card info-card hidden">
+          <div class="alert-icon"></div>
+          <div class="alert-body">
+            
+            <!-- <button class="btn btn-sm btn-primary mt-2" onclick="openAddModal('income')">+ Add Income Now</button> -->
+          </div>
+        </div>
+
+        <!-- 🌟 FOCUSED BIG WINDOW: "MONEY LEFT" (Matching Reference Photo 1) 🌟 -->
+        <div class="focused-hero-card">
+          <div class="hero-card-tag">MONEY LEFT</div>
+          
+          <div class="hero-amount-wrap hero-amount-clickable" onclick="openIncomeEntriesModal()" title="Tap to view & edit income/salary entries">
+            <h1 id="hero-balance-val" class="hero-balance-amount">₹0</h1>
+            <span id="hero-month-sub" class="hero-balance-sub">October 2026</span>
+            <span class="click-hint-badge">View Incomes →</span>
+          </div>
+
+          <!-- Progress Bar & Spend Metric -->
+          <div class="hero-progress-section">
+            <div class="hero-progress-track">
+              <div id="hero-progress-fill" class="hero-progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="hero-spend-summary-row">
+              <span id="hero-spent-summary-text" class="hero-spend-text">₹0 spent of ₹0 income · 0%</span>
+            </div>
+          </div>
+
+          <!-- Dual Stat Boxes: Income In & Spent Out -->
+          <div class="hero-dual-grid">
+            <div class="hero-stat-card income-stat hero-stat-clickable" onclick="openIncomeEntriesModal()" title="Tap to view & edit income/salary entries">
+              <div class="stat-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                <span>INCOME IN</span>
+              </div>
+              <div id="hero-income-val" class="stat-amount">₹0</div>
+            </div>
+
+            <div class="hero-stat-card expense-stat">
+              <div class="stat-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                <span>SPENT OUT</span>
+              </div>
+              <div id="hero-expense-val" class="stat-amount">₹0</div>
+            </div>
+          </div>
+
+          <!-- Primary & Secondary Action Buttons -->
+          <div class="hero-btn-stack">
+            <button class="btn btn-hero-expense" onclick="openAddModal('expense')">
+              <span class="btn-plus-icon">+</span>
+              <span>Add expense</span>
+            </button>
+            <button class="btn btn-hero-income" onclick="openAddModal('income')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              <span>Add income</span>
+            </button>
+          </div>
+
+          <!-- Safe Daily Spending Footnote -->
+          <div id="hero-daily-allowance-note" class="hero-footer-note">
+            That's about <span id="hero-daily-allowance-val" class="text-emerald">₹0</span> a day for the next <span id="hero-days-left-val">0</span> days.
+          </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="activity-section-card mt-3">
+          <div class="activity-header">
+            <h3 class="section-title">Recent activity</h3>
+            <button class="see-all-link" onclick="switchTab('spending')">See all</button>
+          </div>
+          <div id="recent-activity-list" class="activity-list">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Where It Went Preview Section -->
+        <div class="activity-section-card mt-3" onclick="switchTab('summary')">
+          <div class="activity-header">
+            <h3 class="section-title">Where it went</h3>
+            <span class="see-all-link">Breakdown →</span>
+          </div>
+          <div id="where-it-went-preview" class="category-preview-bars">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 2: SPENDING (Matching Reference Photo 2) ================= -->
+      <section id="view-spending" class="app-view">
+        
+        <!-- FOCUSED BIG WINDOW: TOTAL SPENT -->
+        <div class="focused-hero-card">
+          <div class="hero-card-header-row">
+            <span class="hero-card-tag" id="spending-header-tag">TOTAL SPENT · OCTOBER 2026</span>
+            <span id="spending-entries-count" class="entries-badge">0 entries</span>
+          </div>
+
+          <div class="hero-amount-row mt-1">
+            <h1 id="spending-total-val" class="hero-balance-amount">₹0</h1>
+          </div>
+
+          <!-- Search Input Inside Big Window -->
+          <div class="spending-search-wrap mt-3">
+            <svg class="spending-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="tx-search-input" placeholder="Search a note, category or amount" class="spending-search-input">
+            <button id="tx-search-clear" class="search-clear-btn hidden" onclick="clearSearch()">✕</button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div id="spending-category-chips" class="spending-chips-row mt-2">
+            <button class="chip-pill active" onclick="setTxCategoryFilter('all')">All</button>
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Grouped Transactions List by Date -->
+        <div id="spending-grouped-list" class="spending-grouped-container mt-3">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Footnote text -->
+        <div class="spending-footer-note">
+          Only the latest 200 entries of the month show here. Totals count every one.
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 3: SUMMARY (Matching Reference Photo 3) ================= -->
+      <section id="view-summary" class="app-view">
+        
+        <!-- FOCUSED BIG WINDOW: MONTH TOTAL -->
+        <div class="focused-hero-card">
+          <div class="hero-card-tag" id="summary-header-tag">MONTH TOTAL · OCTOBER 2026</div>
+
+          <div class="hero-amount-wrap">
+            <h1 id="summary-balance-val" class="hero-balance-amount">₹0 <span class="amount-sub-badge">LEFT</span></h1>
+          </div>
+
+          <!-- Dual Stat Boxes: Came In & Went Out -->
+          <div class="hero-dual-grid mt-2">
+            <div class="hero-stat-card income-stat">
+              <div class="stat-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                <span>CAME IN</span>
+              </div>
+              <div id="summary-came-in-val" class="stat-amount">₹0</div>
+            </div>
+
+            <div class="hero-stat-card expense-stat">
+              <div class="stat-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                <span>WENT OUT</span>
+              </div>
+              <div id="summary-went-out-val" class="stat-amount">₹0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- "Where the money went" WHITE CHART CARD (Matching Photo 3) -->
+        <div class="chart-white-card mt-3">
+          <div class="chart-white-header">
+            <h3 class="chart-white-title">Where the money went</h3>
+            <p id="chart-white-subtitle" class="chart-white-subtitle">October 2026 · ₹0 across 0 categories</p>
+          </div>
+          
+          <div class="chart-content-flex">
+            <!-- Dynamic SVG Donut / Pie Chart -->
+            <div id="pie-chart-container" class="pie-chart-wrap">
+              <!-- Rendered via JS -->
+            </div>
+            
+            <!-- Pie Chart Legend -->
+            <div id="pie-chart-legend" class="pie-chart-legend">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown Card -->
+        <div class="activity-section-card mt-3">
+          <h3 class="section-title mb-3">Category breakdown</h3>
+          <div id="summary-category-breakdown-list" class="category-breakdown-list">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Income This Month Card -->
+        <div class="activity-section-card mt-3">
+          <h3 class="section-title mb-3">Income this month</h3>
+          <div id="summary-income-breakdown-list" class="income-breakdown-list">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Export CSV Button -->
+        <div class="summary-actions-wrap mt-3">
+          <button class="btn btn-secondary w-full" onclick="exportCsv()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download Monthly Report (CSV)</span>
+          </button>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FLOATING ACTION BUTTON (FAB) FOR FAST 1-TAP ENTRY (Right Bottom) -->
+    <button id="main-fab-btn" class="fab-btn-corner" onclick="openFabMenu()" title="Quick Add">
+      <svg id="fab-plus-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+
+    <!-- FAB Quick Actions Popup Menu -->
+    <div id="fab-menu" class="fab-menu-sheet hidden">
+      <div class="fab-backdrop" onclick="closeFabMenu()"></div>
+      <div class="fab-options">
+        <button class="fab-option-btn fab-expense" onclick="closeFabMenu(); openAddModal('expense')">
+          <div class="fab-icon-bubble">-</div>
+          <span>Add Expense / Spent</span>
+        </button>
+        <button class="fab-option-btn fab-income" onclick="closeFabMenu(); openAddModal('income')">
+          <div class="fab-icon-bubble">+</div>
+          <span>Add Income</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTTOM APP NAVIGATION BAR (Balance, Spending, Summary) -->
+    <nav class="bottom-nav">
+      <!-- 1. Balance Tab -->
+      <button class="nav-item active" data-tab="balance" onclick="switchTab('balance')">
+        <div class="nav-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        </div>
+        <span>Balance</span>
+      </button>
+
+      <!-- 2. Spending Tab -->
+      <button class="nav-item" data-tab="spending" onclick="switchTab('spending')">
+        <div class="nav-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        </div>
+        <span>Spending</span>
+      </button>
+
+      <!-- 3. Summary Tab -->
+      <button class="nav-item" data-tab="summary" onclick="switchTab('summary')">
+        <div class="nav-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        </div>
+        <span>Summary</span>
+      </button>
+    </nav>
+
+  </div> <!-- End App Container -->
+
+  <!-- ================= ADD / EDIT TRANSACTION MODAL ================= -->
+  <div id="tx-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Add Expense</h3>
+        <button class="modal-close-btn" onclick="closeTxModal()">✕</button>
+      </div>
+
+      <form id="tx-form" onsubmit="handleTxSubmit(event)">
+        <input type="hidden" id="form-tx-id" value="">
+        
+        <!-- Income vs Expense Switcher Tabs inside Modal -->
+        <div class="modal-type-switcher">
+          <button type="button" id="tab-btn-expense" class="type-tab-btn active" onclick="setModalType('expense')">
+            - Spent
+          </button>
+          <button type="button" id="tab-btn-income" class="type-tab-btn" onclick="setModalType('income')">
+            + Income
+          </button>
+        </div>
+
+        <!-- Big Amount Input with Indian Rupee Symbol -->
+        <div class="form-group amount-group">
+          <label class="form-label" for="form-amount">Amount (Rupees)</label>
+          <div class="amount-input-wrap">
+            <span class="rupee-symbol">₹</span>
+            <input type="number" id="form-amount" step="any" min="1" placeholder="0" required class="amount-input" autofocus>
+          </div>
+        </div>
+
+        <!-- Category Selector -->
+        <div class="form-group">
+          <label class="form-label" for="form-category">Category</label>
+          <select id="form-category" required class="form-select">
+            <!-- Populated dynamically based on type -->
+          </select>
+          <!-- Quick category chips for fast tap on mobile -->
+          <div id="category-chips-row" class="chips-row"></div>
+        </div>
+
+        <!-- Payment Mode Selector -->
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <div class="payment-mode-chips">
+            <label class="mode-chip"><input type="radio" name="paymentMode" value="UPI" checked><span>⚡ UPI</span></label>
+            <label class="mode-chip"><input type="radio" name="paymentMode" value="Cash"><span>💵 Cash</span></label>
+            <label class="mode-chip"><input type="radio" name="paymentMode" value="Card"><span>💳 Card</span></label>
+            <label class="mode-chip"><input type="radio" name="paymentMode" value="Net Banking"><span>🏦 Net Banking</span></label>
+          </div>
+        </div>
+
+        <!-- Date Input -->
+        <div class="form-group">
+          <label class="form-label" for="form-date">Date</label>
+          <input type="date" id="form-date" required class="form-input">
+        </div>
+
+        <!-- Note / Description -->
+        <div class="form-group">
+          <label class="form-label" for="form-notes">Note / Description (Optional)</label>
+          <input type="text" id="form-notes" placeholder="e.g. Transport, Hadya, DMart Groceries" maxlength="150" class="form-input">
+        </div>
+
+        <!-- Submit Button -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeTxModal()">Cancel</button>
+          <button type="submit" id="form-submit-btn" class="btn btn-primary">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= INCOME & SALARY ENTRIES MODAL ================= -->
+  <div id="income-entries-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Income & Salary Entries</h3>
+          <p class="modal-subtitle" id="income-modal-month-sub" style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">October 2026</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeIncomeEntriesModal()">✕</button>
+      </div>
+
+      <div class="income-total-card mb-3">
+        <span class="income-total-label">TOTAL MONTHLY INCOME</span>
+        <span id="income-modal-total-val" class="income-total-val text-emerald">₹0</span>
+      </div>
+
+      <!-- Income Entries List -->
+      <div id="income-modal-list" class="activity-list mb-3">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <div class="modal-footer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeIncomeEntriesModal()">Close</button>
+        <button type="button" class="btn btn-primary" onclick="closeIncomeEntriesModal(); openAddModal('income')">+ Add Income</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title text-danger">Delete Transaction</h3>
+        <button class="modal-close-btn" onclick="closeDeleteModal()">✕</button>
+      </div>
+      <div class="modal-body py-3">
+        <p>Are you sure you want to delete this transaction? Your remaining balance will automatically recalculate.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="/js/pwa.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

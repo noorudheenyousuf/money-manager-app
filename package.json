@@ -1,0 +1,20 @@
+{
+  "name": "money-manager-app-2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node -e \"fetch('http://localhost:5000/api/seed?force=true', {method:'POST'}).then(r=>r.json()).then(console.log)\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "mongoose": "^9.11.2"
+  }
+}
