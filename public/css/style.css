@@ -1069,7 +1069,7 @@ body {
   max-width: 440px;
   padding: 0 20px calc(95px + var(--safe-bottom)) 20px;
   display: flex;
-  flex-direction: column;
+  height: 50%;
   gap: 10px;
 }
 
