@@ -1071,7 +1071,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 130px;
+  height: 150px;
   gap: 10px;
 }
 
@@ -1080,6 +1080,7 @@ body {
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 14px 18px;
+  height: 130px;
   border-radius: var(--radius-lg);
   font-size: 0.98rem;
   font-weight: 700;
