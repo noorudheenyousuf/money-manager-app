@@ -2,7 +2,10 @@
   "name": "money-manager-app-2",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "seed": "node -e \"fetch('http://localhost:5000/api/seed?force=true', {method:'POST'}).then(r=>r.json()).then(console.log)\""
