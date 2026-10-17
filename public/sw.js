@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dhandost-v1.0.0';
+const CACHE_NAME = 'cashflow-v2.0.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,7 +8,8 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/icons/icon.svg',
   '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-512.png',
+  '/icons/favicon.png'
 ];
 
 // Install: Cache static app shell
@@ -49,7 +50,7 @@ self.addEventListener('fetch', (event) => {
           // If valid response, clone and cache for offline viewing of summaries/transactions
           if (networkResponse.ok && event.request.method === 'GET') {
             const responseClone = networkResponse.clone();
-            caches.open('dhandost-api-cache').then((cache) => {
+            caches.open('cashflow-api-cache').then((cache) => {
               cache.put(event.request, responseClone);
             });
           }

@@ -1,12 +1,12 @@
 {
-  "name": "DhanDost - Money Manager & Balance Tracker",
-  "short_name": "DhanDost",
-  "description": "Smart Money Manager. Track monthly income and expenses in real-time with continuous Rupees balance awareness.",
+  "name": "CashFlow - Money Manager & Balance Tracker",
+  "short_name": "CashFlow",
+  "description": "CashFlow - Smart Money Manager. Track monthly income and expenses in real-time with continuous Rupees balance awareness.",
   "start_url": "/",
   "id": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0a0f0d",
+  "theme_color": "#0a0f0d",
   "orientation": "portrait",
   "categories": ["finance", "productivity", "utilities"],
   "icons": [

@@ -32,7 +32,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
       deferredInstallPrompt.prompt();
       const choiceResult = await deferredInstallPrompt.userChoice;
       if (choiceResult.outcome === 'accepted') {
-        console.log('User installed DhanDost PWA');
+        console.log('User installed CashFlow PWA');
       }
       deferredInstallPrompt = null;
       installBtn.classList.add('hidden');
@@ -42,7 +42,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 // App Installed Event
 window.addEventListener('appinstalled', () => {
-  console.log('🎉 DhanDost PWA installed successfully!');
+  console.log('🎉 CashFlow PWA installed successfully!');
   const installBtn = document.getElementById('pwa-install-btn');
   if (installBtn) installBtn.classList.add('hidden');
 });

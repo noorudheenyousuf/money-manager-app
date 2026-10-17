@@ -1,5 +1,5 @@
 // ========================================================
-// DhanDost - Core Application Controller (3-Tab Architecture)
+// CashFlow - Core Application Controller (3-Tab Architecture)
 // ========================================================
 
 const CATEGORIES = {
@@ -130,10 +130,10 @@ async function fetchSummary() {
       if (data.data.availableMonths) {
         state.availableMonths = data.data.availableMonths;
       }
-      localStorage.setItem(`dhandost_summary_${state.currentMonth}`, JSON.stringify(state.summary));
+      localStorage.setItem(`cashflow_summary_${state.currentMonth}`, JSON.stringify(state.summary));
     }
   } catch (err) {
-    const cached = localStorage.getItem(`dhandost_summary_${state.currentMonth}`);
+    const cached = localStorage.getItem(`cashflow_summary_${state.currentMonth}`) || localStorage.getItem(`dhandost_summary_${state.currentMonth}`);
     if (cached) state.summary = JSON.parse(cached);
   }
 }
@@ -145,10 +145,10 @@ async function fetchTransactions() {
     const data = await res.json();
     if (data.success) {
       state.transactions = data.data;
-      localStorage.setItem(`dhandost_txs_${state.currentMonth}`, JSON.stringify(state.transactions));
+      localStorage.setItem(`cashflow_txs_${state.currentMonth}`, JSON.stringify(state.transactions));
     }
   } catch (err) {
-    const cached = localStorage.getItem(`dhandost_txs_${state.currentMonth}`);
+    const cached = localStorage.getItem(`cashflow_txs_${state.currentMonth}`) || localStorage.getItem(`dhandost_txs_${state.currentMonth}`);
     if (cached) state.transactions = JSON.parse(cached);
   }
 }
